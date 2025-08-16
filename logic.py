@@ -106,17 +106,17 @@ class Book:
 
 
 class Readers:
-    def __init__(self, fullname, phone, email):
-        self.fullname = fullname
+    def __init__(self, full_name, phone, email):
+        self.full_name = full_name
         self.phone = phone
         self.email = email
     
     async def save(self, db):
         async with db.pool.acquire() as conn:
             await conn.execute("""
-            insert into readers (fullname,phone,email)
+            insert into readers (full_name,phone,email)
             values($1,$2,$3)
-""", self.fullname, self.phone, self.email)
+""", self.full_name, self.phone, self.email)
         print('Readers Saved')
             
 
@@ -131,7 +131,7 @@ class Loan:
         async def save(self, db):
             async with db.pool.acquire() as conn:
              await conn.execute("""
-            insert into loans(book_id,reader_id,lissue_date,return_date,returned)
+            insert into(book_id,reader_id,lissue_date,return_date,returned)
             values($1,$2,$3,$4,$5)
 
 """, self.book_id, self.reader_id, self.issue_date, self.return_date, self.returned)
@@ -168,8 +168,8 @@ class LibraryManager:
         except Exception as e:
             print('Error from search:', e)
 
-    async def add_reader(self, fullname, phone, email):
-        reader = Readers(fullname, phone, email)
+    async def add_reader(self, full_name, phone, email):
+        reader = Readers(full_name, phone, email)
         await reader.save(self.db)
         print('Вы зарегистрировались!')
 
@@ -180,19 +180,19 @@ class LibraryManager:
             select * from readers
 """)
                 for i, user in enumerate(users, 1):
-                    print(f'{i}. {user['fullname']} - {user['phone']}')
+                    print(f'{i}. {user['full_name']} - {user['phone']}')
         except Exception as e:
             print('Error', e)
 
-    async def borrow_book(self, book_title, fullname):
+    async def borrow_book(self, book_title, full_name):
         try:
             async with self.db.pool.acquire() as conn:
                 book = await conn.fetchrow("""
         SELECT id FROM books WHERE title = $1;
     """, book_title)
                 reader = await conn.fetchrow("""
-        SELECT id FROM readers WHERE fullname = $1;
-    """, fullname)
+        SELECT id FROM readers WHERE full_name = $1;
+    """, full_name)
         except Exception as e:
             print('Error from borrow:', e)
 
@@ -209,15 +209,15 @@ class LibraryManager:
         await loan.save(self.db)
         print('Вы взяли книгу!')
 
-        async def return_book(self, book_title, fullname):
-        try:
-            async with self.db.pool.acquire() as conn:
-                book = await conn.fetchrow("""
-        SELECT id FROM books WHERE title = $1;
-    """, book_title)
+        async def return_book(self, book_title, full_name):
+            try:
+                async with self.db.pool.acquire() as conn:
+                    book = await conn.fetchrow("""
+         SELECT id FROM books WHERE title = $1;
+      """, book_title)
                 reader = await conn.fetchrow("""
-        SELECT id FROM readers WHERE fullname = $1;
-    """, fullname)
+          SELECT id FROM readers WHERE full_name = $1;
+     """, full_name)
                 if not book:
                     print('Такой книги нету!')
                     return
@@ -229,15 +229,15 @@ class LibraryManager:
 """, book['id'], reader['id'])
                 await Book.incremment(self.db, book['id'])
                 print('Книга возвращена!')
-        except Exception as e:
-            print('Error from borrow:', e)
+            except Exception as e:
+                 print('Error from borrow:', e)
     
     async def get_loans(self):
         async with self.db.pool.acquire() as conn:
             loans = await conn.fetch("""
-    select r.fullname, b.title, l.return_date from loans as l
+    select r.full_name, b.title, l.return_date from loans as l
     join books as b on b.id = l.book_id
     join readers as r on r.id = l.reader_id;
 """)
             for i, loan in enumerate(loans, 1):
-                print(f'{i}. {loan['fullname']} - {loan['title']} - {loan['return_date']}')
+                print(f'{i}. {loan['full_name']} - {loan['title']} - {loan['return_date']}')

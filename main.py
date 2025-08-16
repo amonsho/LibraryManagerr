@@ -7,11 +7,11 @@ from database import DatabaseConfig
 async def main():
     db = DatabaseConfig(
             user='postgres',
-            password='postgres',
-            db_name='books'
+            password='Am.on$sh_op',
+            db_name='lib_manager_db'
         )
     await db.connect()
-    await db.create_tables()
+    await db.create_table()
     manager = LibraryManager(db)
 
     while True:
@@ -40,10 +40,10 @@ async def main():
             text = input('Что ищите?')
             await manager.search_book(text)
         elif choice == '4':
-            fullname = input('Введите ваше полное имя: ')
+            full_name = input('Введите ваше полное имя: ')
             email = input('Введите адрес электронной почты: ')
             phone = input('Введите номер телефона: ')
-            await manager.add_reader(fullname, phone, email)
+            await manager.add_reader(full_name, phone, email)
         elif choice == '5':
             await manager.get_users()
         elif choice == '6':
