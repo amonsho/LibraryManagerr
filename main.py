@@ -48,12 +48,12 @@ async def main():
             await manager.get_users()
         elif choice == '6':
             book_title = input('Введите название книги: ')
-            fullname = input('Введите ваше полное имя: ')
-            await manager.borrow_book(book_title, fullname)
+            full_name = input('Введите ваше полное имя: ')
+            await manager.borrow_book(book_title, full_name)
         elif choice == '7':
             book_title = input('Введите название книги: ')
-            fullname = input('Введите ваше полное имя: ')
-            await manager.return_book(book_title, fullname)
+            full_name = input('Введите ваше полное имя: ')
+            await manager.return_book(book_title, full_name)
         elif choice == '8':
             await manager.get_loans()
         elif choice == '0':

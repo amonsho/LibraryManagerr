@@ -128,10 +128,10 @@ class Loan:
         self.return_date = return_date
         self.returned = False
 
-        async def save(self, db):
-            async with db.pool.acquire() as conn:
-             await conn.execute("""
-            insert into(book_id,reader_id,lissue_date,return_date,returned)
+    async def save(self, db):
+        async with db.pool.acquire() as conn:
+            await conn.execute("""
+            insert into loans(book_id,reader_id,issue_date,return_date,returned)
             values($1,$2,$3,$4,$5)
 
 """, self.book_id, self.reader_id, self.issue_date, self.return_date, self.returned)
@@ -164,7 +164,7 @@ class LibraryManager:
         SELECT * FROM books WHERE title ilike '%{text}%' OR genre ilike '%{text}%';
     """)
                 for i, book in enumerate(books, 1):
-                    print(f'{i}. {book['title']} - {book['author']} - {book['year']}')
+                    print(f"{i}. {book['title']} - {book['author']} - {book['year']}")
         except Exception as e:
             print('Error from search:', e)
 
@@ -180,7 +180,7 @@ class LibraryManager:
             select * from readers
 """)
                 for i, user in enumerate(users, 1):
-                    print(f'{i}. {user['full_name']} - {user['phone']}')
+                    print(f"{i}. {user['full_name']} - {user['phone']}")
         except Exception as e:
             print('Error', e)
 
@@ -209,10 +209,10 @@ class LibraryManager:
         await loan.save(self.db)
         print('Вы взяли книгу!')
 
-        async def return_book(self, book_title, full_name):
-            try:
-                async with self.db.pool.acquire() as conn:
-                    book = await conn.fetchrow("""
+    async def return_book(self, book_title, full_name):
+        try:
+            async with self.db.pool.acquire() as conn:
+                book = await conn.fetchrow("""
          SELECT id FROM books WHERE title = $1;
       """, book_title)
                 reader = await conn.fetchrow("""
@@ -229,8 +229,8 @@ class LibraryManager:
 """, book['id'], reader['id'])
                 await Book.incremment(self.db, book['id'])
                 print('Книга возвращена!')
-            except Exception as e:
-                 print('Error from borrow:', e)
+        except Exception as e:
+                print('Error from borrow:', e)
     
     async def get_loans(self):
         async with self.db.pool.acquire() as conn:
@@ -240,4 +240,4 @@ class LibraryManager:
     join readers as r on r.id = l.reader_id;
 """)
             for i, loan in enumerate(loans, 1):
-                print(f'{i}. {loan['full_name']} - {loan['title']} - {loan['return_date']}')
+                print(f"{i}. {loan['full_name']} - {loan['title']} - {loan['return_date']}")
