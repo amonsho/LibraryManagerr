@@ -1,16 +1,17 @@
 import asyncio
+
+from logic import LibraryManager
 from database import DatabaseConfig
-from logic import Book, Reader,LibraryManager,Loan
-from datetime import datetime
+
 
 async def main():
     db = DatabaseConfig(
-        user='postgres',
-        password='Am.on$sh_op',
-        db_name='lib_manager_db'
-    )
+            user='postgres',
+            password='postgres',
+            db_name='books'
+        )
     await db.connect()
-    await db.create_table()
+    await db.create_tables()
     manager = LibraryManager(db)
 
     while True:
@@ -26,58 +27,38 @@ async def main():
     0. Выход
 """)
         choice = input('Choose one: ')
-
         if choice == '1':
-            title = input('Enter title: ')
-            author = input('Enter author: ')
-            genre = input('Enter genre: ')
-            year = int(input('Enter year: '))
-            copies = int(input('Enter copies: '))
-            book = Book(title, author, genre, year, copies)
-            await manager.add_book(book)
-
+            title = input('Введите название книги: ')
+            author = input('Введите имя автора: ')
+            genre = input('Введите жанр книги: ')
+            year = input('Введите год выпуска книги: ')
+            copies = input('Введите количество копий: ')
+            await manager.add_book(title, author, genre, year, copies)
         elif choice == '2':
-            books = await manager.get_all_books()
-            for book in books:
-                print(f'(id: {book['id']}) {book['title']} - {book['author']} - {book['genre']} - {book['year']} - {book['copies']} copies')
-             
-            
+            await manager.get_books()
         elif choice == '3':
-            keyword = input('Enter title or author: ')
-            await manager.find_book(keyword)
-
+            text = input('Что ищите?')
+            await manager.search_book(text)
         elif choice == '4':
-            full_name = input('Enter full name: ')
-            phone = input('Enter phone: ')
-            email = input('Enter email: ')
-            reader = Reader(full_name, phone, email)
-            await manager.add_reader(reader)
-
+            fullname = input('Введите ваше полное имя: ')
+            email = input('Введите адрес электронной почты: ')
+            phone = input('Введите номер телефона: ')
+            await manager.add_reader(fullname, phone, email)
         elif choice == '5':
-             await manager.get_all_readers()
-
+            await manager.get_users()
         elif choice == '6':
-            book_id = int(input('Enter book ID: '))
-            reader_id = int(input('Enter reader ID: '))
-            issue_date = datetime.now()
-            return_date = datetime.strptime(input('Enter return date (YYYY-MM-DD): '), "%Y-%m-%d")
-            loan = Loan(book_id, reader_id, issue_date, return_date, returned=False)
-            await manager.issue_book(loan)
-
+            book_title = input('Введите название книги: ')
+            fullname = input('Введите ваше полное имя: ')
+            await manager.borrow_book(book_title, fullname)
         elif choice == '7':
-            loan_id = int(input('Enter loan ID to return: '))
-            await manager.return_book(loan_id)
-            print('Book returned!')
-
+            book_title = input('Введите название книги: ')
+            fullname = input('Введите ваше полное имя: ')
+            await manager.return_book(book_title, fullname)
         elif choice == '8':
-            await manager.get_active_loans()
-
+            await manager.get_loans()
         elif choice == '0':
+            print('Вы вышли из системы!')
             break
-
-            
-
-   
 
 
 if __name__ == '__main__':
